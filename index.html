@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertex — Project Management Workspace</title>
+  <meta name="description" content="Vertex Project Management Workspace - Modern team collaboration and task tracking dashboard.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Mobile Scrim -->
+    <button class="mobile-scrim" id="mobileScrim" aria-label="Close menu" style="display: none;"></button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span>vertex<span class="brand-dot">.</span></span>
+      </div>
+
+      <div class="workspace-picker">
+        <span class="workspace-symbol">S</span>
+        <span class="workspace-name">
+          <strong>Studio North</strong>
+          <small>Pro workspace</small>
+        </span>
+        <i data-lucide="chevron-down" style="width: 15px; height: 15px;"></i>
+      </div>
+
+      <div class="side-label">WORKSPACE</div>
+      <nav class="side-nav" id="sideNav">
+        <button class="nav-item active" data-section="Overview">
+          <i data-lucide="layout-grid" style="width: 18px; height: 18px;"></i>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-section="My Tasks">
+          <i data-lucide="list-todo" style="width: 18px; height: 18px;"></i>
+          <span>My Tasks</span>
+        </button>
+        <button class="nav-item" data-section="Timeline">
+          <i data-lucide="calendar-days" style="width: 18px; height: 18px;"></i>
+          <span>Timeline</span>
+        </button>
+        <button class="nav-item" data-section="Team">
+          <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+          <span>Team</span>
+        </button>
+        <button class="nav-item" data-section="Inbox">
+          <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+          <span>Inbox</span>
+          <em id="sideNavInboxBadge" style="display: none;">0</em>
+        </button>
+      </nav>
+
+      <div class="side-label side-label-projects">
+        YOUR PROJECTS 
+        <button title="New task" id="sidebarNewTaskBtn" aria-label="New task">
+          <i data-lucide="plus" style="width: 17px; height: 17px;"></i>
+        </button>
+      </div>
+
+      <button class="project-nav active-project" data-section="Overview">
+        <span class="project-dot purple"></span>
+        Website Redesign
+      </button>
+
+      <div class="sidebar-spacer"></div>
+
+      <div class="help-card">
+        <span class="help-icon"><i data-lucide="sparkles" style="width: 17px; height: 17px;"></i></span>
+        <strong>Keep things moving</strong>
+        <p>Great work happens when everyone is on the same page.</p>
+        <button id="viewTimelineHelpBtn">View timeline <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i></button>
+      </div>
+
+      <div class="sidebar-user" id="sidebarUserBtn" role="button" tabindex="0" title="Click to switch user or sign out">
+        <span class="avatar avatar-normal" id="sidebarUserAvatar" style="background: #d9c9bb;">OR</span>
+        <span>
+          <strong id="sidebarUserName">Olivia Rhye</strong>
+          <small id="sidebarUserRole">Project Lead</small>
+        </span>
+        <i id="sidebarUserActionIcon" data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-area">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu icon-button" id="mobileMenuBtn" aria-label="Open menu">
+            <i data-lucide="menu" style="width: 21px; height: 21px;"></i>
+          </button>
+          <span>Projects</span>
+          <i data-lucide="chevron-right" style="width: 15px; height: 15px;"></i>
+          <strong>Website Redesign</strong>
+        </div>
+
+        <div class="topbar-right">
+          <div class="search-box">
+            <i data-lucide="search" style="width: 17px; height: 17px;"></i>
+            <input type="text" id="searchInput" placeholder="Search tasks..." aria-label="Search tasks">
+            <kbd>⌘ K</kbd>
+          </div>
+
+          <div class="notification-wrap">
+            <button class="icon-button notification-button" id="notificationBtn" aria-label="Notifications">
+              <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+              <span class="notification-pip" id="notificationPip" style="display: none;"></span>
+            </button>
+            <div class="notification-popover" id="notificationPopover" style="display: none;">
+              <div class="popover-header">
+                <strong>Notifications</strong>
+                <span id="popoverUnreadCount">0 new</span>
+              </div>
+              <div id="popoverNoticeList"></div>
+              <button class="popover-footer" id="popoverViewAllBtn">
+                View all notifications <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <span class="topbar-divider"></span>
+
+          <button class="top-avatar" id="topAvatarBtn" title="Account settings / Switch profile">
+            <span class="avatar avatar-small" id="topAvatar" style="background: #d9c9bb;">OR</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Page Intro Header -->
+        <div class="page-intro">
+          <div>
+            <div class="eyebrow">PROJECT WORKSPACE <span class="eyebrow-line"></span></div>
+            <h1 id="pageTitle">Project overview</h1>
+            <p id="pageDescription">Here’s what’s happening with your project today.</p>
+          </div>
+          <div class="intro-actions">
+            <button class="button button-light" id="adminAccessBtn">
+              <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Admin access
+            </button>
+            <button class="button button-primary" id="newTaskBtn">
+              <i data-lucide="plus" style="width: 18px; height: 18px;"></i> New task
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION: Overview -->
+        <div id="sectionOverview">
+          <!-- Hero Banner -->
+          <div class="project-hero">
+            <div class="hero-main">
+              <div class="hero-icon">
+                <i data-lucide="folder-kanban" style="width: 25px; height: 25px;"></i>
+              </div>
+              <div>
+                <div class="hero-title-row">
+                  <h2>Website Redesign</h2>
+                  <span class="status-pill"><span></span> In progress</span>
+                </div>
+                <p>Refreshing our digital experience, one detail at a time.</p>
+                <div class="hero-meta">
+                  <span id="heroDateRange"><i data-lucide="calendar-days" style="width: 15px; height: 15px;"></i> Active Timeline</span>
+                  <i></i>
+                  <span id="heroMemberCount"><i data-lucide="users" style="width: 15px; height: 15px;"></i> 5 members</span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-progress">
+              <div class="progress-copy">
+                <span>Overall progress</span>
+                <strong id="heroProgressPercent">0%</strong>
+              </div>
+              <div class="progress-track">
+                <span id="heroProgressBar" style="width: 0%;"></span>
+              </div>
+              <div class="hero-progress-bottom">
+                <div class="avatar-stack" id="heroAvatarStack"></div>
+                <button id="heroViewTeamBtn">View team <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-icon lavender"><i data-lucide="list-todo" style="width: 19px; height: 19px;"></i></span>
+              <span class="stat-label">Total tasks</span>
+              <div class="stat-value">
+                <span id="statTotalTasks">00</span> 
+                <span class="stat-trend positive"><i data-lucide="arrow-up-right" style="width: 13px; height: 13px;"></i> All time</span>
+              </div>
+              <p>Across all project phases</p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon mint"><i data-lucide="check-circle-2" style="width: 19px; height: 19px;"></i></span>
+              <span class="stat-label">Completed</span>
+              <div class="stat-value">
+                <span id="statCompletedTasks">00</span> 
+                <span class="stat-trend positive" id="statCompletedTrend"><i data-lucide="arrow-up-right" style="width: 13px; height: 13px;"></i> 0%</span>
+              </div>
+              <p>Tasks finished so far</p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon peach"><i data-lucide="activity" style="width: 19px; height: 19px;"></i></span>
+              <span class="stat-label">In progress</span>
+              <div class="stat-value">
+                <span id="statInProgressTasks">00</span> 
+                <span class="stat-trend neutral">On track</span>
+              </div>
+              <p>Currently being worked on</p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon rose"><i data-lucide="clock-3" style="width: 19px; height: 19px;"></i></span>
+              <span class="stat-label">Due soon</span>
+              <div class="stat-value">
+                <span id="statDueSoonTasks">00</span> 
+                <span class="stat-trend warning">Next 3 days</span>
+              </div>
+              <p>Keep an eye on deadlines</p>
+            </div>
+          </div>
+
+          <!-- Dashboard Grid -->
+          <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div class="dashboard-left">
+              <!-- Progress Card -->
+              <div class="card progress-card">
+                <div class="section-heading">
+                  <div>
+                    <h2>Project progress</h2>
+                    <p>A snapshot of how things are moving</p>
+                  </div>
+                  <span class="select-lite">This month <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i></span>
+                </div>
+                <div class="chart-top">
+                  <strong id="chartProgressPercent">0%</strong>
+                  <span class="chart-change"><i data-lucide="arrow-up-right" style="width: 14px; height: 14px;"></i> Looking good</span>
+                </div>
+                <p class="chart-description">of all tasks completed</p>
+                <div class="chart-container">
+                  <div class="chart-grid">
+                    <span>100%</span>
+                    <span>75%</span>
+                    <span>50%</span>
+                    <span>25%</span>
+                    <span>0%</span>
+                  </div>
+                  <svg class="chart-svg" viewBox="0 0 650 180" preserveAspectRatio="none" aria-label="Project progress trend">
+                    <defs>
+                      <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stop-color="#7866eb" stop-opacity="0.17"></stop>
+                        <stop offset="100%" stop-color="#7866eb" stop-opacity="0"></stop>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0 157 C48 150 77 148 117 134 S190 128 231 104 S302 103 350 84 S418 83 465 58 S537 61 583 31 S622 30 650 17 L650 180 L0 180 Z" fill="url(#chartFill)"></path>
+                    <path d="M0 157 C48 150 77 148 117 134 S190 128 231 104 S302 103 350 84 S418 83 465 58 S537 61 583 31 S622 30 650 17" fill="none" stroke="#7665e9" stroke-width="3" stroke-linecap="round"></path>
+                    <circle cx="583" cy="31" r="6" fill="#7665e9" stroke="white" stroke-width="3"></circle>
+                  </svg>
+                </div>
+                <div class="chart-months">
+                  <span>Week 1</span>
+                  <span>Week 2</span>
+                  <span>Week 3</span>
+                  <span>Week 4</span>
+                  <span>Week 5</span>
+                </div>
+              </div>
+
+              <!-- Upcoming Tasks Card -->
+              <div class="card upcoming-card">
+                <div class="section-heading">
+                  <div>
+                    <h2>Upcoming tasks</h2>
+                    <p>What’s next on the to-do list</p>
+                  </div>
+                  <button class="text-action" id="upcomingViewAllBtn">View all <i data-lucide="arrow-right" style="width: 15px; height: 15px;"></i></button>
+                </div>
+                <div class="upcoming-list" id="upcomingTasksList"></div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="dashboard-right">
+              <!-- Timeline Card -->
+              <div class="card timeline-card">
+                <div class="section-heading">
+                  <div>
+                    <h2>Project timeline</h2>
+                    <p>Key milestones at a glance</p>
+                  </div>
+                  <button class="dots-button" id="overviewTimelineDotsBtn" aria-label="View timeline">
+                    <i data-lucide="ellipsis" style="width: 21px; height: 21px;"></i>
+                  </button>
+                </div>
+                <div class="timeline-list" id="overviewTimelineList"></div>
+                <button class="card-bottom-link" id="overviewTimelineBottomBtn">
+                  View full timeline <i data-lucide="arrow-right" style="width: 15px; height: 15px;"></i>
+                </button>
+              </div>
+
+              <!-- Team Contribution Card -->
+              <div class="card team-card">
+                <div class="section-heading">
+                  <div>
+                    <h2>Team contribution</h2>
+                    <p>The people behind the progress</p>
+                  </div>
+                  <button class="text-action" id="overviewTeamViewBtn">View team <i data-lucide="arrow-right" style="width: 15px; height: 15px;"></i></button>
+                </div>
+                <div class="contribution-list" id="overviewContributionList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: My Tasks -->
+        <div id="sectionTasks" style="display: none;">
+          <div class="card full-card">
+            <div class="list-header">
+              <div class="section-heading">
+                <div>
+                  <h2>All project tasks</h2>
+                  <p id="tasksCountSubtitle">0 tasks across your project</p>
+                </div>
+                <button class="button button-outline" id="tasksAddBtn">
+                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add task
+                </button>
+              </div>
+              <div class="filter-bar" id="taskFilterBar">
+                <button class="filter-active" data-filter="All tasks">All tasks</button>
+                <button data-filter="In progress">In progress</button>
+                <button data-filter="To do">To do</button>
+                <button data-filter="Completed">Completed</button>
+              </div>
+            </div>
+
+            <div class="task-table-head">
+              <span>Task</span>
+              <span>Assignee</span>
+              <span>Due date</span>
+              <span>Status</span>
+            </div>
+            <div class="task-table" id="taskTableBody"></div>
+          </div>
+        </div>
+
+        <!-- SECTION: Timeline -->
+        <div id="sectionTimeline" style="display: none;">
+          <div class="timeline-page">
+            <div class="card timeline-overview">
+              <div class="timeline-overview-icon">
+                <i data-lucide="target" style="width: 25px; height: 25px;"></i>
+              </div>
+              <div>
+                <span>THE BIG PICTURE</span>
+                <h2>From kickoff to launch</h2>
+                <p>Every milestone brings us closer to a better digital experience. Follow the journey below.</p>
+              </div>
+              <div class="timeline-overview-count">
+                <strong id="milestonesReachedCount">0/0</strong>
+                <small>milestones reached</small>
+              </div>
+            </div>
+
+            <div class="card milestone-card">
+              <div class="section-heading">
+                <div>
+                  <h2>Project milestones</h2>
+                  <p>Track each phase of the website redesign</p>
+                </div>
+              </div>
+              <div class="milestone-list" id="fullMilestoneList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Team -->
+        <div id="sectionTeam" style="display: none;">
+          <div class="team-summary">
+            <div class="card team-summary-card">
+              <div class="summary-icon"><i data-lucide="users" style="width: 22px; height: 22px;"></i></div>
+              <div>
+                <strong id="teamSummaryMembersCount">0</strong>
+                <span>Team members</span>
+              </div>
+            </div>
+            <div class="card team-summary-card">
+              <div class="summary-icon green"><i data-lucide="check-check" style="width: 22px; height: 22px;"></i></div>
+              <div>
+                <strong id="teamSummaryCompletedTasks">0</strong>
+                <span>Tasks completed together</span>
+              </div>
+            </div>
+            <div class="card team-summary-card">
+              <div class="summary-icon orange"><i data-lucide="activity" style="width: 22px; height: 22px;"></i></div>
+              <div>
+                <strong id="teamSummaryProgressPercent">0%</strong>
+                <span>Project completion</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card team-directory">
+            <div class="section-heading">
+              <div>
+                <h2>Meet the team</h2>
+                <p>Everyone contributing to Website Redesign</p>
+              </div>
+            </div>
+            <div class="member-grid" id="teamMemberGrid"></div>
+          </div>
+        </div>
+
+        <!-- SECTION: Inbox -->
+        <div id="sectionInbox" style="display: none;">
+          <div class="card inbox-card">
+            <div class="section-heading">
+              <div>
+                <h2>Activity & alerts</h2>
+                <p>Deadline reminders and team completion updates</p>
+              </div>
+              <span class="inbox-count" id="inboxUnreadBadge">0 unread</span>
+            </div>
+            <div class="inbox-list" id="inboxList"></div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+          <span>© <span id="currentYear">2026</span> Vertex Workspace</span>
+          <span>Made for better teamwork <span class="footer-heart">✦</span></span>
+        </footer>
+      </div>
+    </main>
+
+    <!-- MODAL: Auth / Sign In -->
+    <div class="modal-backdrop" id="authModal" style="display: none;">
+      <div class="modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+        <button class="modal-close" id="authModalCloseBtn" aria-label="Close">
+          <i data-lucide="x" style="width: 19px; height: 19px;"></i>
+        </button>
+        <div class="modal-symbol">
+          <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+        </div>
+        <h2 id="authModalTitle">Welcome to Vertex</h2>
+        <p class="modal-subtitle">Sign in to manage tasks and collaborate with your team.</p>
+        <form id="authForm">
+          <label>
+            Email address
+            <input type="email" id="authEmailInput" value="olivia@vertex.demo" required>
+          </label>
+          <label>
+            Password
+            <input type="password" id="authPasswordInput" value="demo1234" required>
+          </label>
+          <button type="submit" class="button button-primary modal-submit">
+            Sign in <i data-lucide="arrow-right" style="width: 17px; height: 17px;"></i>
+          </button>
+        </form>
+        <div class="demo-accounts">
+          <strong>Demo access</strong>
+          <p>Use password <code>demo1234</code> for any account.</p>
+          <button type="button" id="demoLeadBtn">Project lead · Olivia Rhye</button>
+          <button type="button" id="demoMemberBtn">Team member · Phoenix Baker</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Create New Task -->
+    <div class="modal-backdrop" id="newTaskModal" style="display: none;">
+      <div class="modal task-modal" role="dialog" aria-modal="true" aria-labelledby="newTaskModalTitle">
+        <button class="modal-close" id="newTaskModalCloseBtn" aria-label="Close">
+          <i data-lucide="x" style="width: 19px; height: 19px;"></i>
+        </button>
+        <div class="modal-symbol">
+          <i data-lucide="plus" style="width: 24px; height: 24px;"></i>
+        </div>
+        <h2 id="newTaskModalTitle">Create a new task</h2>
+        <p class="modal-subtitle">Give your team a clear next step.</p>
+        <form id="newTaskForm">
+          <label>
+            Task name
+            <input type="text" id="newTaskTitle" placeholder="e.g. Design the pricing page" required maxlength="240">
+          </label>
+          <label>
+            Description <span class="optional">Optional</span>
+            <textarea id="newTaskDescription" placeholder="Add a little more context..." rows="3"></textarea>
+          </label>
+          <div class="form-columns">
+            <label>
+              Assign to
+              <select id="newTaskAssignee"></select>
+            </label>
+            <label>
+              Due date
+              <input type="date" id="newTaskDueDate" required>
+            </label>
+          </div>
+          <div class="form-columns">
+            <label>
+              Category
+              <select id="newTaskCategory">
+                <option value="Design">Design</option>
+                <option value="Development">Development</option>
+                <option value="Research">Research</option>
+                <option value="Planning">Planning</option>
+              </select>
+            </label>
+            <label>
+              Priority
+              <select id="newTaskPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="button button-outline" id="newTaskCancelBtn">Cancel</button>
+            <button type="submit" class="button button-primary">Create task <i data-lucide="arrow-right" style="width: 17px; height: 17px;"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: View / Edit Task Details -->
+    <div class="modal-backdrop" id="taskDetailModal" style="display: none;">
+      <div class="modal task-modal" role="dialog" aria-modal="true" aria-labelledby="taskDetailTitle">
+        <button class="modal-close" id="taskDetailCloseBtn" aria-label="Close">
+          <i data-lucide="x" style="width: 19px; height: 19px;"></i>
+        </button>
+        <div class="task-modal-eyebrow">
+          <span class="category-dot" id="taskDetailCategoryDot"></span>
+          <span id="taskDetailCategoryText">Design</span>
+          <span>·</span>
+          <span id="taskDetailIdText">Task #1</span>
+        </div>
+        <h2 id="taskDetailTitle">Task Name</h2>
+        <p class="modal-subtitle" id="taskDetailDescription">Task description goes here.</p>
+        <form id="taskDetailForm">
+          <input type="hidden" id="editTaskId">
+          <label>
+            Task name
+            <input type="text" id="editTaskTitle" required>
+          </label>
+          <div class="form-columns">
+            <label>
+              Assignee
+              <select id="editTaskAssignee"></select>
+            </label>
+            <label>
+              Due date
+              <input type="date" id="editTaskDueDate" required>
+            </label>
+          </div>
+          <div class="form-columns">
+            <label>
+              Status
+              <select id="editTaskStatus">
+                <option value="todo">To do</option>
+                <option value="in_progress">In progress</option>
+                <option value="done">Completed</option>
+              </select>
+            </label>
+            <label>
+              Priority
+              <select id="editTaskPriority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+          </div>
+          <div class="modal-actions">
+            <div>
+              <button type="button" class="delete-button" id="deleteTaskBtn">
+                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Delete
+              </button>
+            </div>
+            <button type="button" class="button button-outline" id="taskDetailCancelBtn">Close</button>
+            <button type="submit" class="button button-primary" id="saveTaskBtn">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toastNotification" style="display: none;">
+      <i data-lucide="check-circle-2" style="width: 17px; height: 17px;"></i>
+      <span id="toastMessage">Action completed</span>
+      <button id="toastCloseBtn" aria-label="Dismiss toast">
+        <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="script.js"></script>
+</body>
+</html>
